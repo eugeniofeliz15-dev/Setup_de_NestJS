@@ -1,0 +1,82 @@
+// 1. Generador del cliente de Prisma
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+// 2. Conexión a la base de datos
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 3. Enums
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum Role {
+  RECEPCIONISTA
+  MEDICO
+  GERENCIA
+}
+
+// 4. Modelos
+model Specialty {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  doctors   Doctor[]
+
+  @@map("specialties")
+}
+
+model Doctor {
+  id          Int       @id @default(autoincrement())
+  firstName   String
+  lastName    String
+  email       String    @unique
+  specialtyId Int
+  specialty   Specialty @relation(fields: [specialtyId], references: [id])
+  appointments Appointment[]
+
+  @@map("doctors")
+}
+
+model Patient {
+  id         Int           @id @default(autoincrement())
+  firstName  String
+  lastName   String
+  email      String        @unique
+  phone      String
+  birthDate  DateTime
+  createdAt  DateTime      @default(now())
+  appointments Appointment[]
+
+  @@map("patients")
+}
+
+model Appointment {
+  id          Int              @id @default(autoincrement())
+  patientId   Int
+  doctorId    Int
+  scheduledAt DateTime
+  status      AppointmentStatus @default(SCHEDULED)
+  notes       String?
+  patient     Patient          @relation(fields: [patientId], references: [id])
+  doctor      Doctor           @relation(fields: [doctorId], references: [id])
+
+  @@map("appointments")
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+  role     Role
+  firstName String?
+  lastName  String?
+
+  @@map("users")
+}
