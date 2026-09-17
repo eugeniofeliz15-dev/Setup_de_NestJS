@@ -1,5 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateMedicoDto } from './dto/create-medico.dto';
+import { UpdateMedicoDto } from './dto/update-medico.dto';
 
 @Injectable()
 export class MedicosService {
@@ -9,19 +11,31 @@ export class MedicosService {
     return this.prisma.doctor.findMany();
   }
 
-  findOne(id: number) {
-    return this.prisma.doctor.findUnique({ where: { id } });
+  async findOne(id: number) {
+    const medico = await this.prisma.doctor.findUnique({ where: { id } });
+    if (!medico) {
+      throw new NotFoundException(`Médico con ID ${id} no encontrado`);
+    }
+    return medico;
   }
 
-  create(data: any) {
+  create(data: CreateMedicoDto) {
     return this.prisma.doctor.create({ data });
   }
 
-  update(id: number, data: any) {
-    return this.prisma.doctor.update({ where: { id }, data });
+  async update(id: number, data: UpdateMedicoDto) {
+    try {
+      return await this.prisma.doctor.update({ where: { id }, data });
+    } catch (error) {
+      throw new NotFoundException(`Médico con ID ${id} no encontrado`);
+    }
   }
 
-  remove(id: number) {
-    return this.prisma.doctor.delete({ where: { id } });
+  async remove(id: number) {
+    try {
+      return await this.prisma.doctor.delete({ where: { id } });
+    } catch (error) {
+      throw new NotFoundException(`Médico con ID ${id} no encontrado`);
+    }
   }
 }
