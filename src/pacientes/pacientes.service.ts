@@ -20,31 +20,20 @@ export class PacientesService {
   }
 
   create(data: CreatePacienteDto) {
-    // Validación de fecha no futura
     if (new Date(data.birthDate) > new Date()) {
       throw new BadRequestException('La fecha de nacimiento no puede ser futura');
     }
     return this.prisma.patient.create({ data });
   }
 
-  async update(id: number, data: UpdatePacienteDto) {
-    // Validación de fecha no futura si se está actualizando
+  update(id: number, data: UpdatePacienteDto) {
     if (data.birthDate && new Date(data.birthDate) > new Date()) {
       throw new BadRequestException('La fecha de nacimiento no puede ser futura');
     }
-    
-    try {
-      return await this.prisma.patient.update({ where: { id }, data });
-    } catch (error) {
-      throw new NotFoundException(`Paciente con ID ${id} no encontrado`);
-    }
+    return this.prisma.patient.update({ where: { id }, data });
   }
 
-  async remove(id: number) {
-    try {
-      return await this.prisma.patient.delete({ where: { id } });
-    } catch (error) {
-      throw new NotFoundException(`Paciente con ID ${id} no encontrado`);
-    }
+  remove(id: number) {
+    return this.prisma.patient.delete({ where: { id } });
   }
 }

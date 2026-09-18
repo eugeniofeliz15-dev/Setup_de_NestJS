@@ -23,19 +23,11 @@ export class MedicosService {
     return this.prisma.doctor.create({ data });
   }
 
-  async update(id: number, data: UpdateMedicoDto) {
-    try {
-      return await this.prisma.doctor.update({ where: { id }, data });
-    } catch (error) {
-      throw new NotFoundException(`Médico con ID ${id} no encontrado`);
-    }
+  update(id: number, data: UpdateMedicoDto) {
+    return this.prisma.doctor.update({ where: { id }, data });
   }
 
-  async remove(id: number) {
-    try {
-      return await this.prisma.doctor.delete({ where: { id } });
-    } catch (error) {
-      throw new NotFoundException(`Médico con ID ${id} no encontrado`);
-    }
+  remove(id: number) {
+    return this.prisma.doctor.delete({ where: { id } });
   }
 }

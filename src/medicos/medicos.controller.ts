@@ -27,20 +27,12 @@ export class MedicosController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateMedicoDto) {
-    try {
-      return await this.medicosService.update(Number(id), dto);
-    } catch (error) {
-      throw new NotFoundException(`Médico con ID ${id} no encontrado`);
-    }
+  update(@Param('id') id: string, @Body() dto: UpdateMedicoDto) {
+    return this.medicosService.update(Number(id), dto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    try {
-      return await this.medicosService.remove(Number(id));
-    } catch (error) {
-      throw new NotFoundException(`Médico con ID ${id} no encontrado`);
-    }
+  remove(@Param('id') id: string) {
+    return this.medicosService.remove(Number(id));
   }
 }
