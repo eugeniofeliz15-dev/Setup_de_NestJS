@@ -7,15 +7,11 @@ import { UpdatePacienteDto } from './dto/update-paciente.dto';
 export class PacientesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.patient.findMany();
-  }
+  findAll() { return this.prisma.patient.findMany(); }
 
   async findOne(id: number) {
     const paciente = await this.prisma.patient.findUnique({ where: { id } });
-    if (!paciente) {
-      throw new NotFoundException(`Paciente con ID ${id} no encontrado`);
-    }
+    if (!paciente) throw new NotFoundException(`Paciente con ID ${id} no encontrado`);
     return paciente;
   }
 
@@ -33,7 +29,5 @@ export class PacientesService {
     return this.prisma.patient.update({ where: { id }, data });
   }
 
-  remove(id: number) {
-    return this.prisma.patient.delete({ where: { id } });
-  }
+  remove(id: number) { return this.prisma.patient.delete({ where: { id } }); }
 }
