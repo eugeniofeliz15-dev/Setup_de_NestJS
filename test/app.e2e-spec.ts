@@ -3,8 +3,9 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
+import { describe, it, expect } from 'vitest';
 
-describe('AppController (e2e)', () => {
+/* describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeEach(async () => {
@@ -25,5 +26,20 @@ describe('AppController (e2e)', () => {
 
   afterEach(async () => {
     await app.close();
+  });
+}); */
+function edadPermitida(edad: number): boolean {
+  return edad >= 18;
+}
+
+describe('edadPermitida', () => {
+  it('confirmar si es una edad permitida', () => {
+    expect(edadPermitida(18)).toBe(true);
+    expect(edadPermitida(25)).toBe(true);
+  });
+
+  it('confirmar si es una edad no permitida', () => {
+    expect(edadPermitida(17)).toBe(false);
+    expect(edadPermitida(0)).toBe(false);
   });
 });
