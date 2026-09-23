@@ -7,17 +7,12 @@ import { PrismaExceptionFilter } from './prisma/prisma-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
-  // ValidationPipe global
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     transform: true
   }));
-
-  
+ 
   app.useGlobalFilters(new PrismaExceptionFilter());
-
-  
   const config = new DocumentBuilder()
     .setTitle('Clínica Salud Integral')
     .setDescription('API de la clínica, migrada a NestJS')
