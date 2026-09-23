@@ -14,10 +14,10 @@ async function bootstrap() {
     transform: true
   }));
 
-  // Exception Filter global
+  
   app.useGlobalFilters(new PrismaExceptionFilter());
 
-  // Configuración de Swagger con orden personalizado
+  
   const config = new DocumentBuilder()
     .setTitle('Clínica Salud Integral')
     .setDescription('API de la clínica, migrada a NestJS')
