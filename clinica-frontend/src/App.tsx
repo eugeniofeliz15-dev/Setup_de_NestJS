@@ -1,7 +1,12 @@
-import { PaginaDashboard } from './pages/PaginaDashboard';
+// Descomenta la que quieras ver hoy. 
+// import { PaginaDashboard } from './pages/PaginaDashboard';
+import { PaginaPacientes } from './pages/PaginaPacientes';
 
 function App() {
-  return <PaginaDashboard />;
+  return (
+    // <PaginaDashboard />
+    <PaginaPacientes />
+  );
 }
 
 export default App;
