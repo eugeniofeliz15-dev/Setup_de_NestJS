@@ -1,13 +1,15 @@
-import type { Paciente } from '../types/paciente';
+import type { Paciente, EstadoPaciente } from '../types/paciente';
 import { BadgeEstado } from './BadgeEstado';
 
 interface PacienteCardProps {
   paciente: Paciente;
+  onCambiarEstado: (id: string, estado: EstadoPaciente) => void;
+  onEliminar: (id: string) => void;
 }
 
-export function PacienteCard({ paciente }: PacienteCardProps) {
+export function PacienteCard({ paciente, onCambiarEstado, onEliminar }: PacienteCardProps) {
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3">
+    <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4">
       <div className="flex justify-between items-start">
         <div>
           <h3 className="text-lg font-semibold text-slate-800">
@@ -18,10 +20,10 @@ export function PacienteCard({ paciente }: PacienteCardProps) {
         <BadgeEstado estado={paciente.estado} />
       </div>
       
-      <div className="space-y-2 text-sm text-slate-600 border-t border-slate-100 pt-3 mt-1">
+      <div className="space-y-2 text-sm text-slate-600 border-t border-slate-100 pt-3">
         <div className="flex justify-between">
           <span>📧 Email:</span>
-          <span className="font-medium text-slate-800">{paciente.email}</span>
+          <span className="font-medium text-slate-800 truncate max-w-[150px]">{paciente.email}</span>
         </div>
         <div className="flex justify-between">
           <span>📱 Teléfono:</span>
@@ -31,6 +33,25 @@ export function PacienteCard({ paciente }: PacienteCardProps) {
           <span>📅 Última cita:</span>
           <span className="font-medium text-slate-800">{paciente.ultimaCita}</span>
         </div>
+      </div>
+
+      <div className="flex gap-2 pt-2 border-t border-slate-100 mt-auto">
+        <select
+          value={paciente.estado}
+          onChange={(e) => onCambiarEstado(paciente.id, e.target.value as EstadoPaciente)}
+          className="flex-1 text-sm border border-slate-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+        >
+          <option value="activo">Activo</option>
+          <option value="inactivo">Inactivo</option>
+          <option value="en_espera">En espera</option>
+        </select>
+        
+        <button
+          onClick={() => onEliminar(paciente.id)}
+          className="px-3 py-1.5 text-sm font-medium text-rose-600 bg-rose-50 border border-rose-200 rounded-lg hover:bg-rose-100 transition-colors"
+        >
+          Eliminar
+        </button>
       </div>
     </div>
   );
