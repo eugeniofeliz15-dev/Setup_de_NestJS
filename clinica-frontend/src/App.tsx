@@ -5,10 +5,15 @@ import { PaginaPacientes } from './pages/PaginaPacientes';
 import { PaginaDetallePaciente } from './pages/PaginaDetallePaciente';
 import { PaginaNuevaCita } from './pages/PaginaNuevaCita';
 import { PaginaNotFound } from './pages/PaginaNotFound';
+import { PaginaLogin } from './pages/PaginaLogin';
 
 function App() {
   return (
     <Routes>
+      {/* Ruta de Login fuera del Layout (sin sidebar) */}
+      <Route path="/login" element={<PaginaLogin />} />
+      
+      {/* Rutas con Layout */}
       <Route path="/" element={<Layout />}>
         <Route index element={<PaginaDashboard />} />
         <Route path="pacientes" element={<PaginaPacientes />} />

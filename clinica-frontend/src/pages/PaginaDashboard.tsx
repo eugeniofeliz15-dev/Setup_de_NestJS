@@ -1,49 +1,103 @@
-import { useState } from 'react';
-import type { Metrica } from '../types';
+import { useState, useEffect } from 'react';
+import type { Metrica, Paciente, Medico, Cita } from '../types';
 import { MetricCard } from '../components/MetricCard';
 import { StatusBadge } from '../components/StatusBadge';
+import { api } from '../lib/axios';
 
 export function PaginaDashboard() {
-  const [pacientes, setPacientes] = useState(128);
   const [mantenimiento, setMantenimiento] = useState(false);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(false);
+  const [metricas, setMetricas] = useState<Metrica[]>([]);
 
-  const metricas: Metrica[] = [
-    {
-      id: 'pacientes',
-      titulo: 'Pacientes',
-      valor: pacientes,
-      descripcion: '+12% respecto al mes anterior',
-      tendencia: 'positiva',
-      icono: '👥',
-    },
-    {
-      id: 'citas',
-      titulo: 'Citas Hoy',
-      valor: 42,
-      descripcion: '8 reprogramadas',
-      tendencia: 'neutra',
-      icono: '📅',
-    },
-    {
-      id: 'consultas',
-      titulo: 'Consultas Pendientes',
-      valor: 17,
-      descripcion: '-3 desde ayer',
-      tendencia: 'positiva',
-      icono: '📋',
-    },
-    {
-      id: 'disponibilidad',
-      titulo: 'Disponibilidad',
-      valor: '87%',
-      descripcion: 'Capacidad de atención',
-      tendencia: 'neutra',
-      icono: '⏱️',
-    },
-  ];
+  useEffect(() => {
+    const cargarMetricas = async () => {
+      setCargando(true);
+      setError(false);
+      try {
+        const [pacientesRes, medicosRes, citasRes] = await Promise.all([
+          api.get<Paciente[]>('/pacientes'),
+          api.get<Medico[]>('/medicos'),
+          api.get<Cita[]>('/citas'),
+        ]);
 
-  const incrementarPacientes = () => setPacientes((prev) => prev + 1);
-  const decrementarPacientes = () => setPacientes((prev) => Math.max(0, prev - 1));
+        const pacientes = pacientesRes.data;
+        const medicos = medicosRes.data;
+        const citas = citasRes.data;
+
+        const citasProgramadas = citas.filter((c: Cita) => c.status === 'SCHEDULED');
+        const citasCompletadas = citas.filter((c: Cita) => c.status === 'COMPLETED');
+
+        setMetricas([
+          {
+            id: 'pacientes',
+            titulo: 'Pacientes',
+            valor: pacientes.length,
+            descripcion: 'Total registrados',
+            tendencia: 'positiva',
+            icono: '👥',
+          },
+          {
+            id: 'medicos',
+            titulo: 'Médicos',
+            valor: medicos.length,
+            descripcion: 'Equipo médico',
+            tendencia: 'neutra',
+            icono: '‍⚕️',
+          },
+          {
+            id: 'citas-programadas',
+            titulo: 'Citas Programadas',
+            valor: citasProgramadas.length,
+            descripcion: 'Pendientes de atención',
+            tendencia: 'neutra',
+            icono: '📅',
+          },
+          {
+            id: 'citas-completadas',
+            titulo: 'Completadas Hoy',
+            valor: citasCompletadas.length,
+            descripcion: 'Atendidas',
+            tendencia: 'positiva',
+            icono: '✅',
+          },
+        ]);
+      } catch (err) {
+        setError(true);
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    cargarMetricas();
+  }, []);
+
+  if (cargando) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-600 text-lg">Cargando métricas...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center bg-white p-8 rounded-xl shadow-lg border border-rose-200">
+          <p className="text-rose-600 text-lg mb-4">Error al cargar los datos</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -70,24 +124,7 @@ export function PaginaDashboard() {
       </header>
 
       <main className="px-8 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-slate-800">Métricas generales</h2>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-600">Pacientes:</span>
-            <button
-              onClick={decrementarPacientes}
-              className="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 font-bold hover:bg-rose-200 transition-colors"
-            >
-              −
-            </button>
-            <button
-              onClick={incrementarPacientes}
-              className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 font-bold hover:bg-emerald-200 transition-colors"
-            >
-              +
-            </button>
-          </div>
-        </div>
+        <h2 className="text-xl font-semibold text-slate-800 mb-6">Métricas generales</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {metricas.map((metrica) => (

@@ -1,4 +1,4 @@
-import type { EstadoPaciente } from '../types/paciente';
+import type { EstadoPaciente } from '../types';
 
 interface BadgeEstadoProps {
   estado: EstadoPaciente;
