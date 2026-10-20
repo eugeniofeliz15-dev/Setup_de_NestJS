@@ -1,14 +1,39 @@
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { PACIENTES_INICIALES } from './PaginaPacientes'; 
+import type { Paciente } from '../types';
 import { BadgeEstado } from '../components/BadgeEstado';
+import { api } from '../lib/axios';
 
 export function PaginaDetallePaciente() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [paciente, setPaciente] = useState<Paciente | null>(null);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(false);
 
-  const paciente = PACIENTES_INICIALES.find((p) => p.id === id);
+  useEffect(() => {
+    if (!id) return;
+    
+    setCargando(true);
+    setError(false);
+    api.get<Paciente>(`/pacientes/${id}`)
+      .then((res) => setPaciente(res.data))
+      .catch(() => setError(true))
+      .finally(() => setCargando(false));
+  }, [id]);
 
-  if (!paciente) {
+  if (cargando) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-600 text-lg">Cargando paciente...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !paciente) {
     return (
       <div className="p-8 text-center">
         <h2 className="text-2xl font-bold text-slate-800 mb-4">Paciente no encontrado</h2>
@@ -32,11 +57,11 @@ export function PaginaDetallePaciente() {
         <div className="flex justify-between items-start mb-6">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">
-              {paciente.nombre} {paciente.apellido}
+              {paciente.firstName} {paciente.lastName}
             </h1>
-            <p className="text-slate-500">{paciente.especialidadAsignada}</p>
+            <p className="text-slate-500">ID: {paciente.id}</p>
           </div>
-          <BadgeEstado estado={paciente.estado} />
+          <BadgeEstado estado={paciente.estado || 'activo'} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -46,15 +71,19 @@ export function PaginaDetallePaciente() {
           </div>
           <div>
             <h3 className="text-sm font-medium text-slate-500 mb-1">Teléfono</h3>
-            <p className="text-slate-800">{paciente.telefono}</p>
+            <p className="text-slate-800">{paciente.phone}</p>
           </div>
           <div>
-            <h3 className="text-sm font-medium text-slate-500 mb-1">Última Cita</h3>
-            <p className="text-slate-800">{paciente.ultimaCita}</p>
+            <h3 className="text-sm font-medium text-slate-500 mb-1">Fecha de nacimiento</h3>
+            <p className="text-slate-800">
+              {new Date(paciente.birthDate).toLocaleDateString()}
+            </p>
           </div>
           <div>
-            <h3 className="text-sm font-medium text-slate-500 mb-1">ID de Paciente</h3>
-            <p className="text-slate-800 font-mono text-sm">{paciente.id}</p>
+            <h3 className="text-sm font-medium text-slate-500 mb-1">Registrado el</h3>
+            <p className="text-slate-800">
+              {paciente.createdAt ? new Date(paciente.createdAt).toLocaleDateString() : 'N/A'}
+            </p>
           </div>
         </div>
       </div>
