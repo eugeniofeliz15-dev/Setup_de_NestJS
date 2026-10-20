@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useNavigate } from 'react-router-dom';
 import { citaSchema, type CitaFormData } from '../schemas/citaSchema';
 import { useMedicos } from '../hooks/useMedicos';
 
-export function FormularioCita() {
+export function PaginaNuevaCita() {
+  const navigate = useNavigate(); // <-- Agregado para la navegación
   const { medicos, cargando } = useMedicos();
   const [enviando, setEnviando] = useState(false);
   const [citaExitosa, setCitaExitosa] = useState<CitaFormData | null>(null);
@@ -172,21 +174,30 @@ export function FormularioCita() {
             )}
           </div>
 
-          {/* Botón de Envío */}
-          <button
-            type="submit"
-            disabled={isSubmitting || enviando}
-            className="w-full px-4 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {isSubmitting || enviando ? (
-              <>
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                Agendando...
-              </>
-            ) : (
-              'Confirmar y Agendar Cita'
-            )}
-          </button>
+          {/* Botones de Acción (Cancelar y Enviar) */}
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="flex-1 px-4 py-3 bg-slate-200 text-slate-700 font-medium rounded-lg hover:bg-slate-300 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting || enviando}
+              className="flex-1 px-4 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isSubmitting || enviando ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  Agendando...
+                </>
+              ) : (
+                'Confirmar y Agendar Cita'
+              )}
+            </button>
+          </div>
         </form>
       </div>
     </div>

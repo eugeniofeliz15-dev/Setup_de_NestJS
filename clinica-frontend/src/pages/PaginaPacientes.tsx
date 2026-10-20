@@ -3,7 +3,7 @@ import type { ChangeEvent, FormEvent } from 'react';
 import type { Paciente, EstadoPaciente } from '../types/paciente';
 import { PacienteCard } from '../components/PacienteCard';
 
-const PACIENTES_INICIALES: Paciente[] = [
+export const PACIENTES_INICIALES: Paciente[] = [
   { id: '1', nombre: 'Ana', apellido: 'García', email: 'ana.garcia@email.com', telefono: '+52 55 1234 5678', especialidadAsignada: 'Cardiología', ultimaCita: '2023-10-10', estado: 'activo' },
   { id: '2', nombre: 'Carlos', apellido: 'López', email: 'carlos.lopez@email.com', telefono: '+52 55 8765 4321', especialidadAsignada: 'Dermatología', ultimaCita: '2023-09-15', estado: 'en_espera' },
   { id: '3', nombre: 'María', apellido: 'Rodríguez', email: 'maria.rod@email.com', telefono: '+52 55 1122 3344', especialidadAsignada: 'Pediatría', ultimaCita: '2023-10-01', estado: 'activo' },
