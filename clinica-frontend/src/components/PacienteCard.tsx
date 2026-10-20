@@ -1,5 +1,6 @@
 import type { Paciente, EstadoPaciente } from '../types/paciente';
 import { BadgeEstado } from './BadgeEstado';
+import { Link } from 'react-router-dom';
 
 interface PacienteCardProps {
   paciente: Paciente;
@@ -35,6 +36,7 @@ export function PacienteCard({ paciente, onCambiarEstado, onEliminar }: Paciente
         </div>
       </div>
 
+      {/* Contenedor Flex para las acciones rápidas */}
       <div className="flex gap-2 pt-2 border-t border-slate-100 mt-auto">
         <select
           value={paciente.estado}
@@ -53,6 +55,14 @@ export function PacienteCard({ paciente, onCambiarEstado, onEliminar }: Paciente
           Eliminar
         </button>
       </div>
+
+      {/* El Link va FUERA del flex, ocupando todo el ancho al final de la tarjeta */}
+      <Link
+        to={`/pacientes/${paciente.id}`}
+        className="block w-full text-center px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors text-sm font-medium"
+      >
+        Ver detalle →
+      </Link>
     </div>
   );
 }
