@@ -10,6 +10,12 @@ import { LoggingInterceptor } from './common/logging.interceptor';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // ✅ AGREGAR ESTA LÍNEA PARA CORS (Obligatorio para el Día 1)
+  app.enableCors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+  });
+
   // ValidationPipe global
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
@@ -37,7 +43,6 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
-
 
   const configService = app.get(ConfigService);
   await app.listen(configService.get<number>('PORT') ?? 3000);
