@@ -142,7 +142,8 @@ exports.Prisma.PatientScalarFieldEnum = {
   email: 'email',
   phone: 'phone',
   birthDate: 'birthDate',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  estado: 'estado'
 };
 
 exports.Prisma.AppointmentScalarFieldEnum = {
