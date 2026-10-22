@@ -3281,6 +3281,7 @@ export namespace Prisma {
     phone: string | null
     birthDate: Date | null
     createdAt: Date | null
+    estado: string | null
   }
 
   export type PatientMaxAggregateOutputType = {
@@ -3291,6 +3292,7 @@ export namespace Prisma {
     phone: string | null
     birthDate: Date | null
     createdAt: Date | null
+    estado: string | null
   }
 
   export type PatientCountAggregateOutputType = {
@@ -3301,6 +3303,7 @@ export namespace Prisma {
     phone: number
     birthDate: number
     createdAt: number
+    estado: number
     _all: number
   }
 
@@ -3321,6 +3324,7 @@ export namespace Prisma {
     phone?: true
     birthDate?: true
     createdAt?: true
+    estado?: true
   }
 
   export type PatientMaxAggregateInputType = {
@@ -3331,6 +3335,7 @@ export namespace Prisma {
     phone?: true
     birthDate?: true
     createdAt?: true
+    estado?: true
   }
 
   export type PatientCountAggregateInputType = {
@@ -3341,6 +3346,7 @@ export namespace Prisma {
     phone?: true
     birthDate?: true
     createdAt?: true
+    estado?: true
     _all?: true
   }
 
@@ -3438,6 +3444,7 @@ export namespace Prisma {
     phone: string
     birthDate: Date
     createdAt: Date
+    estado: string
     _count: PatientCountAggregateOutputType | null
     _avg: PatientAvgAggregateOutputType | null
     _sum: PatientSumAggregateOutputType | null
@@ -3467,6 +3474,7 @@ export namespace Prisma {
     phone?: boolean
     birthDate?: boolean
     createdAt?: boolean
+    estado?: boolean
     appointments?: boolean | Patient$appointmentsArgs<ExtArgs>
     _count?: boolean | PatientCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["patient"]>
@@ -3479,6 +3487,7 @@ export namespace Prisma {
     phone?: boolean
     birthDate?: boolean
     createdAt?: boolean
+    estado?: boolean
   }, ExtArgs["result"]["patient"]>
 
   export type PatientSelectScalar = {
@@ -3489,6 +3498,7 @@ export namespace Prisma {
     phone?: boolean
     birthDate?: boolean
     createdAt?: boolean
+    estado?: boolean
   }
 
   export type PatientInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3510,6 +3520,7 @@ export namespace Prisma {
       phone: string
       birthDate: Date
       createdAt: Date
+      estado: string
     }, ExtArgs["result"]["patient"]>
     composites: {}
   }
@@ -3911,6 +3922,7 @@ export namespace Prisma {
     readonly phone: FieldRef<"Patient", 'String'>
     readonly birthDate: FieldRef<"Patient", 'DateTime'>
     readonly createdAt: FieldRef<"Patient", 'DateTime'>
+    readonly estado: FieldRef<"Patient", 'String'>
   }
     
 
@@ -6216,7 +6228,8 @@ export namespace Prisma {
     email: 'email',
     phone: 'phone',
     birthDate: 'birthDate',
-    createdAt: 'createdAt'
+    createdAt: 'createdAt',
+    estado: 'estado'
   };
 
   export type PatientScalarFieldEnum = (typeof PatientScalarFieldEnum)[keyof typeof PatientScalarFieldEnum]
@@ -6475,6 +6488,7 @@ export namespace Prisma {
     phone?: StringFilter<"Patient"> | string
     birthDate?: DateTimeFilter<"Patient"> | Date | string
     createdAt?: DateTimeFilter<"Patient"> | Date | string
+    estado?: StringFilter<"Patient"> | string
     appointments?: AppointmentListRelationFilter
   }
 
@@ -6486,6 +6500,7 @@ export namespace Prisma {
     phone?: SortOrder
     birthDate?: SortOrder
     createdAt?: SortOrder
+    estado?: SortOrder
     appointments?: AppointmentOrderByRelationAggregateInput
   }
 
@@ -6500,6 +6515,7 @@ export namespace Prisma {
     phone?: StringFilter<"Patient"> | string
     birthDate?: DateTimeFilter<"Patient"> | Date | string
     createdAt?: DateTimeFilter<"Patient"> | Date | string
+    estado?: StringFilter<"Patient"> | string
     appointments?: AppointmentListRelationFilter
   }, "id" | "email">
 
@@ -6511,6 +6527,7 @@ export namespace Prisma {
     phone?: SortOrder
     birthDate?: SortOrder
     createdAt?: SortOrder
+    estado?: SortOrder
     _count?: PatientCountOrderByAggregateInput
     _avg?: PatientAvgOrderByAggregateInput
     _max?: PatientMaxOrderByAggregateInput
@@ -6529,6 +6546,7 @@ export namespace Prisma {
     phone?: StringWithAggregatesFilter<"Patient"> | string
     birthDate?: DateTimeWithAggregatesFilter<"Patient"> | Date | string
     createdAt?: DateTimeWithAggregatesFilter<"Patient"> | Date | string
+    estado?: StringWithAggregatesFilter<"Patient"> | string
   }
 
   export type AppointmentWhereInput = {
@@ -6754,6 +6772,7 @@ export namespace Prisma {
     phone: string
     birthDate: Date | string
     createdAt?: Date | string
+    estado?: string
     appointments?: AppointmentCreateNestedManyWithoutPatientInput
   }
 
@@ -6765,6 +6784,7 @@ export namespace Prisma {
     phone: string
     birthDate: Date | string
     createdAt?: Date | string
+    estado?: string
     appointments?: AppointmentUncheckedCreateNestedManyWithoutPatientInput
   }
 
@@ -6775,6 +6795,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     birthDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    estado?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUpdateManyWithoutPatientNestedInput
   }
 
@@ -6786,6 +6807,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     birthDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    estado?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUncheckedUpdateManyWithoutPatientNestedInput
   }
 
@@ -6797,6 +6819,7 @@ export namespace Prisma {
     phone: string
     birthDate: Date | string
     createdAt?: Date | string
+    estado?: string
   }
 
   export type PatientUpdateManyMutationInput = {
@@ -6806,6 +6829,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     birthDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    estado?: StringFieldUpdateOperationsInput | string
   }
 
   export type PatientUncheckedUpdateManyInput = {
@@ -6816,6 +6840,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     birthDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    estado?: StringFieldUpdateOperationsInput | string
   }
 
   export type AppointmentCreateInput = {
@@ -7097,6 +7122,7 @@ export namespace Prisma {
     phone?: SortOrder
     birthDate?: SortOrder
     createdAt?: SortOrder
+    estado?: SortOrder
   }
 
   export type PatientAvgOrderByAggregateInput = {
@@ -7111,6 +7137,7 @@ export namespace Prisma {
     phone?: SortOrder
     birthDate?: SortOrder
     createdAt?: SortOrder
+    estado?: SortOrder
   }
 
   export type PatientMinOrderByAggregateInput = {
@@ -7121,6 +7148,7 @@ export namespace Prisma {
     phone?: SortOrder
     birthDate?: SortOrder
     createdAt?: SortOrder
+    estado?: SortOrder
   }
 
   export type PatientSumOrderByAggregateInput = {
@@ -7850,6 +7878,7 @@ export namespace Prisma {
     phone: string
     birthDate: Date | string
     createdAt?: Date | string
+    estado?: string
   }
 
   export type PatientUncheckedCreateWithoutAppointmentsInput = {
@@ -7860,6 +7889,7 @@ export namespace Prisma {
     phone: string
     birthDate: Date | string
     createdAt?: Date | string
+    estado?: string
   }
 
   export type PatientCreateOrConnectWithoutAppointmentsInput = {
@@ -7905,6 +7935,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     birthDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    estado?: StringFieldUpdateOperationsInput | string
   }
 
   export type PatientUncheckedUpdateWithoutAppointmentsInput = {
@@ -7915,6 +7946,7 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     birthDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    estado?: StringFieldUpdateOperationsInput | string
   }
 
   export type DoctorUpsertWithoutAppointmentsInput = {

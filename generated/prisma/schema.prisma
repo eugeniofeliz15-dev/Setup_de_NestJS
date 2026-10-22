@@ -45,13 +45,17 @@ model Doctor {
 }
 
 model Patient {
-  id           Int           @id @default(autoincrement())
-  firstName    String
-  lastName     String
-  email        String        @unique
-  phone        String
-  birthDate    DateTime
-  createdAt    DateTime      @default(now())
+  id        Int      @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String   @unique
+  phone     String
+  birthDate DateTime
+  createdAt DateTime @default(now())
+
+  // ✅ CAMPO AGREGADO PARA EL ESTADO DEL PACIENTE
+  estado String @default("activo")
+
   appointments Appointment[]
 
   @@map("patients")
