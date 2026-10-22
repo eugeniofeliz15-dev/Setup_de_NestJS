@@ -1,40 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import type { Cita } from '../types';
-import { getAll, updateEstado } from '../services/citas';
+import { useCitasStore } from '../stores/citasStore';
 import { extraerMensajeError } from '../lib/errorHandler';
 
 export function PaginaCitas() {
-  const [citas, setCitas] = useState<Cita[]>([]);
-  const [cargando, setCargando] = useState(true);
+  // Conectamos con el store de citas
+  const citas = useCitasStore((s) => s.citas);
+  const cargando = useCitasStore((s) => s.cargando);
+  const cargar = useCitasStore((s) => s.cargar);
+  const actualizarEstado = useCitasStore((s) => s.actualizarEstado);
 
   useEffect(() => {
-    getAll()
-      .then((res) => setCitas(res.data))
-      .catch(() => toast.error('Error al cargar citas'))
-      .finally(() => setCargando(false));
-  }, []);
+    cargar();
+  }, [cargar]);
 
-  // UI OPTIMISTA: Actualizamos la UI antes de que el servidor responda
   const handleCambiarEstado = async (citaId: number, nuevoEstado: Cita['status']) => {
-    // 1. Guardamos el estado original por si falla
-    const citaOriginal = citas.find((c) => c.id === citaId);
-    if (!citaOriginal) return;
-
-    // 2. Actualizamos la UI inmediatamente (Optimista)
-    setCitas((prev) =>
-      prev.map((c) => (c.id === citaId ? { ...c, status: nuevoEstado } : c))
-    );
-
     try {
-      // 3. Llamamos a la API
-      await updateEstado(citaId, nuevoEstado);
+      // El store ya maneja la UI optimista y el rollback si falla
+      await actualizarEstado(citaId, nuevoEstado);
       toast.success('Estado de la cita actualizado');
     } catch (err) {
-      // 4. Si falla, REVERTIMOS al estado original
-      setCitas((prev) =>
-        prev.map((c) => (c.id === citaId ? citaOriginal : c))
-      );
       toast.error(`Error: ${extraerMensajeError(err)}. Cambio revertido.`);
     }
   };
@@ -43,7 +29,7 @@ export function PaginaCitas() {
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 mb-6">Gestión de Citas (UI Optimista)</h1>
+      <h1 className="text-2xl font-bold text-slate-800 mb-6">Gestión de Citas (UI Optimista con Zustand)</h1>
       
       <div className="space-y-4">
         {citas.map((cita) => (
@@ -51,6 +37,7 @@ export function PaginaCitas() {
             <div>
               <p className="font-semibold text-slate-800">Cita #{cita.id}</p>
               <p className="text-sm text-slate-500">Paciente ID: {cita.pacienteId} | Médico ID: {cita.medicoId}</p>
+              <p className="text-xs text-slate-400 mt-1">Estado actual: {cita.status}</p>
             </div>
             
             <div className="flex gap-2">
