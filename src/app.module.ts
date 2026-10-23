@@ -17,6 +17,7 @@ import { AuthModule } from './auth/auth.module';
         DATABASE_URL: Joi.string().required(),
         JWT_SECRET: Joi.string().min(10).required(),
         PORT: Joi.number().default(3000),
+        CORS_ORIGINS: Joi.string().default('http://localhost:5173,http://localhost:5174'),
       }),
     }),
     PrismaModule,

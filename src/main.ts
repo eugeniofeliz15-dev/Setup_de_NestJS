@@ -10,9 +10,13 @@ import { LoggingInterceptor } from './common/logging.interceptor';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // ✅ AGREGAR ESTA LÍNEA PARA CORS (Obligatorio para el Día 1)
+  const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:5173,http://localhost:5174')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: corsOrigins,
     credentials: true,
   });
 
@@ -47,4 +51,4 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   await app.listen(configService.get<number>('PORT') ?? 3000);
 }
-bootstrap();
+void bootstrap();
