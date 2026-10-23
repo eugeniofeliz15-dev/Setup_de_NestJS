@@ -31,6 +31,16 @@
 $ pnpm install
 ```
 
+## Run the clinic app in development
+
+Configure the backend `.env` file with the database connection and JWT secret. Stop any existing servers using ports `3000` or `5174`, then start both the API and frontend from the repository root:
+
+```bash
+$ pnpm run dev
+```
+
+The frontend is available at `http://localhost:5174` and the API at `http://localhost:3000`. Set `CORS_ORIGINS` in `.env` if the frontend runs from a different origin.
+
 ## Compile and run the project
 
 ```bash

@@ -6,10 +6,10 @@ import { PacienteCard } from '../components/PacienteCard';
 import { ModalConfirmacion } from '../components/ModalConfirmacion';
 import { usePacientesStore } from '../stores/pacientesStore';
 import { useFiltrosStore } from '../stores/filtrosStore';
+import { useDebounce } from '../hooks/useDebounce';
 import { extraerMensajeError } from '../lib/errorHandler';
 
 export function PaginaPacientes() {
-  // 1. Conectamos con el store de pacientes (usando selectores)
   const pacientes = usePacientesStore((s) => s.pacientes);
   const cargando = usePacientesStore((s) => s.cargando);
   const error = usePacientesStore((s) => s.error);
@@ -17,22 +17,21 @@ export function PaginaPacientes() {
   const eliminar = usePacientesStore((s) => s.eliminar);
   const actualizar = usePacientesStore((s) => s.actualizar);
 
-  // 2. Conectamos con el store de filtros
   const queryPacientes = useFiltrosStore((s) => s.queryPacientes);
   const estadoFiltro = useFiltrosStore((s) => s.estadoFiltro);
   const setQueryPacientes = useFiltrosStore((s) => s.setQueryPacientes);
   const setEstadoFiltro = useFiltrosStore((s) => s.setEstadoFiltro);
 
-  // 3. Estado LOCAL de UI (el modal se queda aquí, no en el store global)
   const [pacienteAEliminar, setPacienteAEliminar] = useState<Paciente | null>(null);
   const [eliminando, setEliminando] = useState(false);
 
-  // 4. Cargar datos al montar el componente
+  // ✅ Aplicar debounce a la búsqueda
+  const queryDebounceada = useDebounce(queryPacientes, 350);
+
   useEffect(() => {
     cargar();
   }, [cargar]);
 
-  // 5. Manejadores de acciones
   const handleCambiarEstado = async (id: number, estado: EstadoPaciente) => {
     try {
       await actualizar(id, { estado });
@@ -61,9 +60,11 @@ export function PaginaPacientes() {
     }
   };
 
-  // 6. Filtrado local basado en el store de filtros
+  // Filtrado usando la query debounceada
   const pacientesFiltrados = pacientes.filter((p) => {
-    const coincideNombre = `${p.firstName} ${p.lastName}`.toLowerCase().includes(queryPacientes.toLowerCase());
+    const coincideNombre = `${p.firstName} ${p.lastName}`
+      .toLowerCase()
+      .includes(queryDebounceada.toLowerCase());
     const coincideEstado = estadoFiltro === 'todos' || p.estado === estadoFiltro;
     return coincideNombre && coincideEstado;
   });
@@ -98,15 +99,22 @@ export function PaginaPacientes() {
         </Link>
       </div>
 
-      {/* Barra de Búsqueda y Filtros conectada al store */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6 flex flex-col md:flex-row gap-4">
-        <input
-          type="text"
-          placeholder="Buscar por nombre o apellido..."
-          value={queryPacientes}
-          onChange={(e) => setQueryPacientes(e.target.value)}
-          className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-        />
+        <div className="relative flex-1">
+          <input
+            type="text"
+            placeholder="Buscar por nombre o apellido..."
+            value={queryPacientes}
+            onChange={(e) => setQueryPacientes(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          />
+          {/* Spinner mientras busca */}
+          {queryPacientes && queryPacientes !== queryDebounceada && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
+        </div>
         <select
           value={estadoFiltro}
           onChange={(e) => setEstadoFiltro(e.target.value as EstadoPaciente | 'todos')}
@@ -122,7 +130,7 @@ export function PaginaPacientes() {
       {pacientesFiltrados.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
           <p className="text-slate-500 text-lg">
-            {pacientes.length === 0 ? 'No hay pacientes registrados' : 'No se encontraron resultados para tu búsqueda'}
+            {pacientes.length === 0 ? 'No hay pacientes registrados' : 'No se encontraron resultados'}
           </p>
         </div>
       ) : (

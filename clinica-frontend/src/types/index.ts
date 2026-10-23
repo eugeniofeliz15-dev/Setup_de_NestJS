@@ -1,5 +1,6 @@
-export type EstadoPaciente = 'activo' | 'inactivo' | 'en_espera';
+export * from './api';
 
+export type EstadoPaciente = 'activo' | 'inactivo' | 'en_espera';
 export type Tendencia = 'positiva' | 'negativa' | 'neutra';
 
 export interface Paciente {
@@ -9,8 +10,8 @@ export interface Paciente {
   email: string;
   phone: string;
   birthDate: string;
-  estado?: EstadoPaciente;
   createdAt?: string;
+  estado?: EstadoPaciente;
 }
 
 export interface Medico {
@@ -25,8 +26,9 @@ export interface Cita {
   id: number;
   pacienteId: number;
   medicoId: number;
-  fecha: string;
+  scheduledAt: string;
   status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
+  notes?: string;
 }
 
 export interface Metrica {
