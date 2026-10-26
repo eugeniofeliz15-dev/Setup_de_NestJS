@@ -4,6 +4,7 @@ const navLinks = [
   { to: '/', label: 'Dashboard', icon: '📊' },
   { to: '/pacientes', label: 'Pacientes', icon: '👥' },
   { to: '/citas/nueva', label: 'Nueva Cita', icon: '📅' },
+  { to: '/reportes', label: 'Reportes', icon: '📈' }, // ✅ AGREGADO
 ];
 
 export function Layout() {

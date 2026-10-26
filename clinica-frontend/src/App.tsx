@@ -8,18 +8,23 @@ import { PaginaNotFound } from './pages/PaginaNotFound';
 import { PaginaLogin } from './pages/PaginaLogin';
 import { PaginaCrearPaciente } from './pages/PaginaCrearPaciente';
 import { PaginaCitas } from './pages/PaginaCitas';
+import { PaginaReportes } from './pages/PaginaReportes';
 
 function App() {
   return (
     <Routes>
-        <Route path="citas" element={<PaginaCitas />} />
-        <Route path="/login" element={<PaginaLogin />} />
-        <Route path="pacientes/nuevo" element={<PaginaCrearPaciente />} />
-        <Route path="/" element={<Layout />}>
+      {/* Ruta pública: Login (sin Layout) */}
+      <Route path="/login" element={<PaginaLogin />} />
+
+      {/* Rutas con Layout (Sidebar visible) */}
+      <Route path="/" element={<Layout />}>
         <Route index element={<PaginaDashboard />} />
         <Route path="pacientes" element={<PaginaPacientes />} />
+        <Route path="pacientes/nuevo" element={<PaginaCrearPaciente />} />
         <Route path="pacientes/:id" element={<PaginaDetallePaciente />} />
+        <Route path="citas" element={<PaginaCitas />} />
         <Route path="citas/nueva" element={<PaginaNuevaCita />} />
+        <Route path="reportes" element={<PaginaReportes />} /> {/* ✅ Sin slash */}
         <Route path="*" element={<PaginaNotFound />} />
       </Route>
     </Routes>

@@ -1,13 +1,17 @@
+import axios from 'axios';
+
 export function extraerMensajeError(err: unknown): string {
+  // Type guard de Axios
+  if (axios.isAxiosError(err)) {
+    // Error del backend con mensaje específico
+    return err.response?.data?.message ?? err.message ?? 'Error del servidor';
+  }
+  
+  // Error genérico de JavaScript
   if (err instanceof Error) {
-    // Si es un error de Axios, intentamos sacar el mensaje del backend
-    if ('response' in err && err.response && typeof err.response === 'object' && 'data' in err.response) {
-      const data = (err.response as { data: unknown }).data;
-      if (data && typeof data === 'object' && 'message' in data) {
-        return (data as { message: string }).message;
-      }
-    }
     return err.message;
   }
-  return 'Ocurrió un error inesperado';
+  
+  // Error desconocido
+  return 'Error inesperado';
 }
