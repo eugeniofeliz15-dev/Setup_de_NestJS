@@ -1,19 +1,29 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../stores/authStore';
 
 const navLinks = [
   { to: '/', label: 'Dashboard', icon: '📊' },
   { to: '/pacientes', label: 'Pacientes', icon: '👥' },
   { to: '/citas/nueva', label: 'Nueva Cita', icon: '📅' },
-  { to: '/reportes', label: 'Reportes', icon: '📈' }, // ✅ AGREGADO
+  { to: '/reportes', label: 'Reportes', icon: '📈' },
 ];
 
 export function Layout() {
+  const { usuario, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
+
   return (
     <div className="flex min-h-screen bg-slate-50">
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-slate-200 flex flex-col p-6 hidden md:flex">
         <h1 className="text-xl font-bold text-slate-800 mb-8">Clínica Salud</h1>
-        <nav className="flex flex-col gap-2">
+        
+        <nav className="flex flex-col gap-2 flex-1">
           {navLinks.map((link) => (
             <NavLink
               key={link.to}
@@ -31,6 +41,24 @@ export function Layout() {
             </NavLink>
           ))}
         </nav>
+        
+        {/* Sección de Usuario y Logout */}
+        <div className="mt-auto pt-6 border-t border-slate-200">
+          <div className="mb-4 px-2">
+            <p className="text-sm font-semibold text-slate-800 truncate">
+              {usuario?.nombre || 'Usuario'}
+            </p>
+            <p className="text-xs text-slate-500 uppercase tracking-wide">
+              {usuario?.rol || 'Rol'}
+            </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-rose-600 bg-rose-50 rounded-lg hover:bg-rose-100 transition-colors font-medium"
+          >
+            🚪 Cerrar sesión
+          </button>
+        </div>
       </aside>
 
       {/* Área Principal */}
