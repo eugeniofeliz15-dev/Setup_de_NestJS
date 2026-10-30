@@ -81,6 +81,8 @@ model User {
   role     Role
   firstName String?
   lastName  String?
+  phone     String?
+  photoUrl  String?
 
   @@map("users")
 }

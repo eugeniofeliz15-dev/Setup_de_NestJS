@@ -11,6 +11,7 @@ import { PaginaLogin } from './pages/PaginaLogin';
 import { PaginaNotFound } from './pages/PaginaNotFound';
 import { PaginaReportes } from './pages/PaginaReportes';
 import { PaginaSinAcceso } from './pages/PaginaSinAcceso';
+import { PaginaPerfil } from './pages/PaginaPerfil';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
       {/* 1. Protección general: Requiere estar autenticado */}
       <Route element={<RutaProtegida />}>
         <Route path="/" element={<Layout />}>
+          <Route path="perfil" element={<PaginaPerfil />} />
           <Route index element={<PaginaDashboard />} />
           <Route path="pacientes" element={<PaginaPacientes />} />
           <Route path="pacientes/nuevo" element={<PaginaCrearPaciente />} />
