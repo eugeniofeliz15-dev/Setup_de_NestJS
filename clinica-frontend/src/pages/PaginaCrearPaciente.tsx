@@ -6,6 +6,7 @@ import { z } from 'zod';
 import toast from 'react-hot-toast';
 import { create } from '../services/pacientes';
 import { extraerMensajeError } from '../lib/errorHandler';
+import { Spinner } from '../shared/components/ui';
 
 
 // Esquema de validación con Zod
@@ -131,7 +132,7 @@ export function PaginaCrearPaciente() {
               className="flex-1 px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {cargando && (
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <Spinner label="Guardando paciente" />
               )}
               {cargando ? 'Guardando...' : 'Guardar Paciente'}
             </button>

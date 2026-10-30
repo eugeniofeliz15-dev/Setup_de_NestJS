@@ -1,15 +1,26 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import type { Cita } from '../types';
 import { useCitasStore } from '../stores/citasStore';
 import { extraerMensajeError } from '../lib/errorHandler';
+import {
+  AlertaBanner,
+  EstadoVacio,
+  ModalConfirmacion,
+  SkeletonCitaRow,
+} from '../shared/components/ui';
 
 export function PaginaCitas() {
+  const navigate = useNavigate();
   // Conectamos con el store de citas
   const citas = useCitasStore((s) => s.citas);
   const cargando = useCitasStore((s) => s.cargando);
+  const error = useCitasStore((s) => s.error);
   const cargar = useCitasStore((s) => s.cargar);
   const actualizarEstado = useCitasStore((s) => s.actualizarEstado);
+  const [citaACancelar, setCitaACancelar] = useState<Cita | null>(null);
+  const [actualizandoEstado, setActualizandoEstado] = useState(false);
 
   useEffect(() => {
     cargar();
@@ -25,42 +36,104 @@ export function PaginaCitas() {
     }
   };
 
-  if (cargando) return <div className="p-8 text-center">Cargando citas...</div>;
+  const handleConfirmarCancelacion = async () => {
+    if (!citaACancelar) return;
+
+    setActualizandoEstado(true);
+    try {
+      await actualizarEstado(citaACancelar.id, 'CANCELLED');
+      toast.success('Cita cancelada');
+      setCitaACancelar(null);
+    } catch (err) {
+      toast.error(`Error: ${extraerMensajeError(err)}. Cambio revertido.`);
+    } finally {
+      setActualizandoEstado(false);
+    }
+  };
+
+  if (cargando) {
+    return (
+      <div className="mx-auto max-w-4xl space-y-4 p-4 md:p-8" aria-label="Cargando citas">
+        {Array.from({ length: 5 }, (_, index) => <SkeletonCitaRow key={index} />)}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-4xl p-4 md:p-8">
+        <AlertaBanner tipo="error" mensaje={`No se pudieron cargar las citas: ${error}`} />
+        <button
+          type="button"
+          onClick={() => cargar()}
+          className="mt-4 rounded-lg bg-indigo-600 px-5 py-2 text-white hover:bg-indigo-700"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 mb-6">Gestión de Citas (UI Optimista con Zustand)</h1>
-      
-      <div className="space-y-4">
-        {citas.map((cita) => (
-          <div key={cita.id} className="bg-white p-4 rounded-lg border border-slate-200 flex justify-between items-center shadow-sm">
-            <div>
-              <p className="font-semibold text-slate-800">Cita #{cita.id}</p>
-              <p className="text-sm text-slate-500">Paciente ID: {cita.pacienteId} | Médico ID: {cita.medicoId}</p>
-              <p className="text-xs text-slate-400 mt-1">Estado actual: {cita.status}</p>
+    <div className="mx-auto max-w-4xl p-4 md:p-8">
+      <h1 className="mb-6 text-2xl font-bold text-slate-800">
+        Gestión de Citas (UI Optimista con Zustand)
+      </h1>
+
+      {citas.length === 0 ? (
+        <EstadoVacio
+          titulo="No hay citas registradas"
+          descripcion="Agenda una cita para que aparezca en esta lista."
+          accion={{ label: 'Agendar cita', onClick: () => navigate('/citas/nueva') }}
+        />
+      ) : (
+        <div className="space-y-4">
+          {citas.map((cita) => (
+            <div
+              key={cita.id}
+              className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+            >
+              <div>
+                <p className="font-semibold text-slate-800">Cita #{cita.id}</p>
+                <p className="text-sm text-slate-500">
+                  Paciente ID: {cita.pacienteId} | Médico ID: {cita.medicoId}
+                </p>
+                <p className="mt-1 text-xs text-slate-400">Estado actual: {cita.status}</p>
+              </div>
+
+              <div className="flex gap-2">
+                {cita.status !== 'COMPLETED' && (
+                  <button
+                    onClick={() => handleCambiarEstado(cita.id, 'COMPLETED')}
+                    className="rounded bg-emerald-100 px-3 py-1 text-sm text-emerald-700 transition-colors hover:bg-emerald-200"
+                  >
+                    Marcar Completada
+                  </button>
+                )}
+                {cita.status !== 'CANCELLED' && (
+                  <button
+                    onClick={() => setCitaACancelar(cita)}
+                    className="rounded bg-rose-100 px-3 py-1 text-sm text-rose-700 transition-colors hover:bg-rose-200"
+                  >
+                    Cancelar
+                  </button>
+                )}
+              </div>
             </div>
-            
-            <div className="flex gap-2">
-              {cita.status !== 'COMPLETED' && (
-                <button
-                  onClick={() => handleCambiarEstado(cita.id, 'COMPLETED')}
-                  className="px-3 py-1 text-sm bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200 transition-colors"
-                >
-                  Marcar Completada
-                </button>
-              )}
-              {cita.status !== 'CANCELLED' && (
-                <button
-                  onClick={() => handleCambiarEstado(cita.id, 'CANCELLED')}
-                  className="px-3 py-1 text-sm bg-rose-100 text-rose-700 rounded hover:bg-rose-200 transition-colors"
-                >
-                  Cancelar
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
+
+      <ModalConfirmacion
+        isOpen={!!citaACancelar}
+        onClose={() => setCitaACancelar(null)}
+        onConfirm={handleConfirmarCancelacion}
+        title="Cancelar cita"
+        message={`¿Confirmas la cancelación de la cita #${citaACancelar?.id}?`}
+        isLoading={actualizandoEstado}
+        confirmLabel="Cancelar cita"
+        loadingLabel="Actualizando..."
+      />
     </div>
   );
 }

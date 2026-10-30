@@ -1,15 +1,22 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import type { Paciente, EstadoPaciente } from '../types';
 import { PacienteCard } from '../components/PacienteCard';
-import { ModalConfirmacion } from '../components/ModalConfirmacion';
 import { usePacientesStore } from '../stores/pacientesStore';
 import { useFiltrosStore } from '../stores/filtrosStore';
 import { useDebounce } from '../hooks/useDebounce';
 import { extraerMensajeError } from '../lib/errorHandler';
+import {
+  AlertaBanner,
+  EstadoVacio,
+  ModalConfirmacion,
+  SkeletonPacienteRow,
+  Spinner,
+} from '../shared/components/ui';
 
 export function PaginaPacientes() {
+  const navigate = useNavigate();
   const pacientes = usePacientesStore((s) => s.pacientes);
   const cargando = usePacientesStore((s) => s.cargando);
   const error = usePacientesStore((s) => s.error);
@@ -71,21 +78,24 @@ export function PaginaPacientes() {
 
   if (cargando) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+      <div className="mx-auto max-w-6xl p-4 md:p-8">
+        <h1 className="mb-6 text-2xl font-bold text-slate-800">Pacientes</h1>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }, (_, index) => (
+            <SkeletonPacienteRow key={index} />
+          ))}
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center bg-white p-8 rounded-xl shadow-lg border border-rose-200">
-          <p className="text-rose-600 text-lg mb-4">{error}</p>
-          <button onClick={() => cargar()} className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+      <div className="mx-auto max-w-6xl p-4 md:p-8">
+        <AlertaBanner tipo="error" mensaje={error} />
+        <button onClick={() => cargar()} className="mt-4 rounded-lg bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700">
             Reintentar
-          </button>
-        </div>
+        </button>
       </div>
     );
   }
@@ -111,7 +121,7 @@ export function PaginaPacientes() {
           {/* Spinner mientras busca */}
           {queryPacientes && queryPacientes !== queryDebounceada && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+              <Spinner label="Buscando pacientes" />
             </div>
           )}
         </div>
@@ -128,11 +138,13 @@ export function PaginaPacientes() {
       </div>
 
       {pacientesFiltrados.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
-          <p className="text-slate-500 text-lg">
-            {pacientes.length === 0 ? 'No hay pacientes registrados' : 'No se encontraron resultados'}
-          </p>
-        </div>
+        <EstadoVacio
+          titulo={pacientes.length === 0 ? 'No hay pacientes registrados' : 'No se encontraron resultados'}
+          descripcion={pacientes.length === 0 ? 'Agrega el primer paciente para comenzar.' : 'Prueba con otros filtros de búsqueda.'}
+          accion={pacientes.length === 0
+            ? { label: 'Agregar paciente', onClick: () => navigate('/pacientes/nuevo') }
+            : undefined}
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {pacientesFiltrados.map((paciente) => (

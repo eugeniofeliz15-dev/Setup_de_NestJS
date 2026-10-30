@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { citaSchema, type CitaFormData } from '../schemas/citaSchema';
 import { useMedicos } from '../hooks/useMedicos';
+import { Spinner } from '../shared/components/ui';
 
 export function PaginaNuevaCita() {
   const navigate = useNavigate(); // <-- Agregado para la navegación
@@ -190,7 +191,7 @@ export function PaginaNuevaCita() {
             >
               {isSubmitting || enviando ? (
                 <>
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  <Spinner label="Agendando cita" />
                   Agendando...
                 </>
               ) : (
