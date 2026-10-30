@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type { Cita } from '../types';
-import { getAll, updateEstado } from '../services/citas';
+import type { Cita, RespuestaPaginada } from '../types';
+import { cargarCitasPaginadas as solicitarCitasPaginadas, getAll, updateEstado } from '../services/citas';
+import type { CargarCitasPaginadasParams } from '../services/citas';
 import { extraerMensajeError } from '../lib/errorHandler';
 
 interface CitasState {
@@ -10,6 +11,7 @@ interface CitasState {
   cargando: boolean;
   error: string | null; // ✅ Agregado
   cargar: () => Promise<void>;
+  cargarCitasPaginadas: (params: CargarCitasPaginadasParams) => Promise<RespuestaPaginada<Cita>>;
   seleccionar: (id: number) => void;
   actualizarEstado: (id: number, status: Cita['status']) => Promise<void>;
 }
@@ -31,6 +33,8 @@ export const useCitasStore = create<CitasState>()(
           set({ error: extraerMensajeError(err), cargando: false }, false, 'cargar/error');
         }
       },
+
+      cargarCitasPaginadas: (params) => solicitarCitasPaginadas(params),
 
       seleccionar: (id) => {
         const cita = get().citas.find((c) => c.id === id) || null;

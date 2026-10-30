@@ -26,6 +26,8 @@ export interface Cita {
   id: number;
   pacienteId: number;
   medicoId: number;
+  patientId?: number;
+  doctorId?: number;
   scheduledAt: string;
   status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
   notes?: string;
