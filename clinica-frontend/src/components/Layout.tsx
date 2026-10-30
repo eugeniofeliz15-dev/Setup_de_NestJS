@@ -4,6 +4,7 @@ import { useAuthStore } from '../stores/authStore';
 const navLinks = [
   { to: '/', label: 'Dashboard', icon: '📊' },
   { to: '/pacientes', label: 'Pacientes', icon: '👥' },
+  { to: '/historial', label: 'Historial de Citas', icon: '📋' },
   { to: '/citas/nueva', label: 'Nueva Cita', icon: '📅' },
   { to: '/reportes', label: 'Reportes', icon: '📈' },
 ];

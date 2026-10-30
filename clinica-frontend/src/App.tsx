@@ -12,6 +12,7 @@ import { PaginaNotFound } from './pages/PaginaNotFound';
 import { PaginaReportes } from './pages/PaginaReportes';
 import { PaginaSinAcceso } from './pages/PaginaSinAcceso';
 import { PaginaPerfil } from './pages/PaginaPerfil';
+import { PaginaHistorialCitas } from './pages/PaginaHistorialCitas';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path="pacientes/:id" element={<PaginaDetallePaciente />} />
           <Route path="citas" element={<PaginaCitas />} />
           <Route path="citas/nueva" element={<PaginaNuevaCita />} />
+          <Route path="historial" element={<PaginaHistorialCitas />} />
           
           {/* 2. Protección por rol: Requiere estar autenticado Y tener el rol específico */}
           <Route element={<RutaProtegida rolesPermitidos={['GERENCIA', 'ADMIN']} />}>
