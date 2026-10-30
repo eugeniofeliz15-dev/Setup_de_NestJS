@@ -3,40 +3,41 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import type { Paciente } from '../types';
 import { BadgeEstado } from '../components/BadgeEstado';
 import { api } from '../lib/axios';
+import { AlertaBanner, Spinner } from '../shared/components/ui';
+import { extraerMensajeError } from '../lib/errorHandler';
 
 export function PaginaDetallePaciente() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [paciente, setPaciente] = useState<Paciente | null>(null);
   const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
     
     setCargando(true);
-    setError(false);
+    setError(null);
     api.get<Paciente>(`/pacientes/${id}`)
       .then((res) => setPaciente(res.data))
-      .catch(() => setError(true))
+      .catch((err: unknown) => setError(extraerMensajeError(err)))
       .finally(() => setCargando(false));
   }, [id]);
 
   if (cargando) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600 text-lg">Cargando paciente...</p>
-        </div>
-      </div>
+      <Spinner fullscreen label="Cargando paciente" />
     );
   }
 
   if (error || !paciente) {
     return (
-      <div className="p-8 text-center">
-        <h2 className="text-2xl font-bold text-slate-800 mb-4">Paciente no encontrado</h2>
+      <div className="mx-auto max-w-3xl p-8 text-center">
+        <AlertaBanner
+          tipo={error ? 'error' : 'advertencia'}
+          mensaje={error ? `No se pudo cargar el paciente: ${error}` : 'Paciente no encontrado o no disponible.'}
+          className="mb-4"
+        />
         <Link to="/pacientes" className="text-indigo-600 hover:underline">
           ← Volver a la lista
         </Link>

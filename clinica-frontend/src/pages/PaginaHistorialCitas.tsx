@@ -5,6 +5,7 @@ import { useCitasStore } from '../stores/citasStore';
 import type { RespuestaPaginada } from '../types/api';
 import type { Cita } from '../types';
 import { extraerMensajeError } from '../lib/errorHandler';
+import { AlertaBanner, EstadoVacio, SkeletonCitaRow } from '../shared/components/ui';
 
 const estados = [
   { label: 'Todos', value: undefined },
@@ -103,15 +104,13 @@ export function PaginaHistorialCitas() {
       {cargando && (
         <div className="space-y-3" aria-label="Cargando citas">
           {Array.from({ length: 10 }, (_, index) => (
-            <div key={index} className="h-16 animate-pulse rounded-lg bg-slate-200" />
+            <SkeletonCitaRow key={index} />
           ))}
         </div>
       )}
 
       {!cargando && error && (
-        <div role="alert" className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-rose-700">
-          No se pudo cargar el historial: {error}
-        </div>
+        <AlertaBanner tipo="error" mensaje={`No se pudo cargar el historial: ${error}`} />
       )}
 
       {!cargando && !error && datos && datos.data.length > 0 && (
@@ -144,9 +143,10 @@ export function PaginaHistorialCitas() {
       )}
 
       {!cargando && !error && datos?.data.length === 0 && (
-        <div className="rounded-lg border border-slate-200 bg-white py-12 text-center">
-          <p className="text-slate-500">No se encontraron citas con este filtro.</p>
-        </div>
+        <EstadoVacio
+          titulo="No hay citas para mostrar"
+          descripcion="No se encontraron citas con este filtro. Prueba con otro estado."
+        />
       )}
 
       {!cargando && !error && datos && datos.totalPaginas > 1 && (

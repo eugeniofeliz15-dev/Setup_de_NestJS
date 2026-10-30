@@ -3,17 +3,19 @@ import type { Metrica, Paciente, Medico, Cita } from '../types';
 import { MetricCard } from '../components/MetricCard';
 import { StatusBadge } from '../components/StatusBadge';
 import { api } from '../lib/axios';
+import { AlertaBanner, SkeletonMetricCard } from '../shared/components/ui';
+import { extraerMensajeError } from '../lib/errorHandler';
 
 export function PaginaDashboard() {
   const [mantenimiento, setMantenimiento] = useState(false);
   const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [metricas, setMetricas] = useState<Metrica[]>([]);
 
   useEffect(() => {
     const cargarMetricas = async () => {
       setCargando(true);
-      setError(false);
+      setError(null);
       try {
         const [pacientesRes, medicosRes, citasRes] = await Promise.all([
           api.get<Paciente[]>('/pacientes'),
@@ -63,7 +65,7 @@ export function PaginaDashboard() {
           },
         ]);
       } catch (err) {
-        setError(true);
+        setError(extraerMensajeError(err));
       } finally {
         setCargando(false);
       }
@@ -74,11 +76,15 @@ export function PaginaDashboard() {
 
   if (cargando) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600 text-lg">Cargando métricas...</p>
-        </div>
+      <div className="min-h-screen bg-slate-50">
+        <main className="px-8 py-8">
+          <h1 className="mb-6 text-xl font-semibold text-slate-800">Métricas generales</h1>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }, (_, index) => (
+              <SkeletonMetricCard key={index} />
+            ))}
+          </div>
+        </main>
       </div>
     );
   }
@@ -86,11 +92,11 @@ export function PaginaDashboard() {
   if (error) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center bg-white p-8 rounded-xl shadow-lg border border-rose-200">
-          <p className="text-rose-600 text-lg mb-4">Error al cargar los datos</p>
+        <div className="w-full max-w-lg bg-white p-8 rounded-xl shadow-lg">
+          <AlertaBanner tipo="error" mensaje={`Error al cargar los datos del dashboard: ${error}`} />
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
           >
             Reintentar
           </button>

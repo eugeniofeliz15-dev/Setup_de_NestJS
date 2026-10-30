@@ -13,6 +13,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { useCitasStore } from '../stores/citasStore';
+import { AlertaBanner, EstadoVacio } from '../shared/components/ui';
 
 interface DatosEspecialidad {
   especialidad: string;
@@ -26,6 +27,7 @@ interface DatosPorDia {
 
 export function PaginaReportes() {
   const citas = useCitasStore((s) => s.citas);
+  const error = useCitasStore((s) => s.error);
   const cargar = useCitasStore((s) => s.cargar);
   const [cargando, setCargando] = useState(true);
   const [datosEspecialidades, setDatosEspecialidades] = useState<DatosEspecialidad[]>([]);
@@ -33,9 +35,11 @@ export function PaginaReportes() {
 
   useEffect(() => {
     const cargarDatos = async () => {
-      setCargando(true);
-      await cargar();
-      setCargando(false);
+      try {
+        await cargar();
+      } finally {
+        setCargando(false);
+      }
     };
     cargarDatos();
   }, [cargar]);
@@ -107,16 +111,27 @@ export function PaginaReportes() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="p-4 md:p-8">
+        <h1 className="mb-6 text-2xl font-bold text-slate-800">Reportes</h1>
+        <AlertaBanner tipo="error" mensaje={`No se pudieron cargar los datos de reportes: ${error}`} />
+      </div>
+    );
+  }
+
   if (citas.length === 0) {
     return (
       <div className="p-4 md:p-8 max-w-6xl mx-auto">
         <h1 className="text-2xl font-bold text-slate-800 mb-6">Reportes</h1>
-        <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
-          <p className="text-slate-500 text-lg">No hay datos disponibles para mostrar reportes</p>
+        <EstadoVacio
+          titulo="No hay datos disponibles para mostrar reportes"
+          descripcion="Registra citas para generar reportes."
+        >
           <Link to="/citas" className="mt-4 inline-block px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
             Ir a Citas
           </Link>
-        </div>
+        </EstadoVacio>
       </div>
     );
   }
