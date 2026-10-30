@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 
 const navLinks = [
@@ -45,10 +45,13 @@ export function Layout() {
         {/* Sección de Usuario y Logout */}
         <div className="mt-auto pt-6 border-t border-slate-200">
           <div className="mb-4 px-2">
-            <p className="text-sm font-semibold text-slate-800 truncate">
+            <Link
+              to="/perfil"
+              className="mb-1 block truncate text-sm font-semibold text-indigo-600 hover:underline"
+            >
               {usuario?.nombre || 'Usuario'}
-            </p>
-            <p className="text-xs text-slate-500 uppercase tracking-wide">
+            </Link>
+            <p className="text-xs uppercase tracking-wide text-slate-500">
               {usuario?.rol || 'Rol'}
             </p>
           </div>
