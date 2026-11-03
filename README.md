@@ -41,6 +41,12 @@ $ pnpm run dev
 
 The frontend is available at `http://localhost:5174` and the API at `http://localhost:3000`. Set `CORS_ORIGINS` in `.env` if the frontend runs from a different origin.
 
+## Crear la cuenta inicial de gerencia
+
+El inicio de sesión no crea usuarios. Para crear la primera cuenta con rol `GERENCIA`, genera un código con `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"` y guárdalo como variable secreta `GERENCIA_BOOTSTRAP_TOKEN` en el servicio del backend en Render. Despliega el backend y el frontend; luego, desde el login, abre **Crear cuenta inicial de gerencia** y completa el formulario con tu correo, una contraseña de al menos 8 caracteres y ese código.
+
+Esta ruta solo crea una cuenta si todavía no existe ningún usuario `GERENCIA`. Después de crearla, elimina `GERENCIA_BOOTSTRAP_TOKEN` de Render para deshabilitar el alta inicial.
+
 ## Compile and run the project
 
 ```bash
