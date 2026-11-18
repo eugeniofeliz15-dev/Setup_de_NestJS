@@ -1,19 +1,26 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  ServiceUnavailableException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { PrismaService } from '../prisma/prisma.service';
-import { Role } from '../../generated/prisma';
+import { Prisma, Role } from '../../generated/prisma';
+import { BootstrapGerenciaDto } from './dto/bootstrap-gerencia.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly configService: ConfigService 
+    private readonly configService: ConfigService,
   ) {}
 
   async register(email: string, password: string, role: string) {
@@ -47,24 +54,86 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      this.configService.getOrThrow<string>('JWT_SECRET'),
-      { expiresIn: '8h' }
-    );
-
-    return {
-      token,
-      usuario: this.toPublicUser(user),
-    };
+    return this.createSession(user);
   }
 
-  async updateProfile(userId: number, datos: UpdateProfileDto, foto?: Express.Multer.File) {
+  async bootstrapGerencia(datos: BootstrapGerenciaDto) {
+    const expectedToken = this.configService.get<string>(
+      'GERENCIA_BOOTSTRAP_TOKEN',
+    );
+    if (!expectedToken) {
+      throw new ServiceUnavailableException(
+        'La creación inicial de gerencia no está habilitada',
+      );
+    }
+
+    const providedToken = Buffer.from(datos.setupToken, 'utf8');
+    const configuredToken = Buffer.from(expectedToken, 'utf8');
+    if (
+      providedToken.length !== configuredToken.length ||
+      !timingSafeEqual(providedToken, configuredToken)
+    ) {
+      throw new UnauthorizedException('Código de configuración inválido');
+    }
+
+    const hashedPassword = await bcrypt.hash(datos.password, 10);
+    const user = await this.prisma
+      .$transaction(
+        async (transaction) => {
+          const existingManager = await transaction.user.findFirst({
+            where: { role: Role.GERENCIA },
+            select: { id: true },
+          });
+          if (existingManager) {
+            throw new ConflictException('Ya existe una cuenta de gerencia');
+          }
+
+          return transaction.user.create({
+            data: {
+              email: datos.email,
+              password: hashedPassword,
+              role: Role.GERENCIA,
+            },
+            select: {
+              id: true,
+              email: true,
+              role: true,
+              firstName: true,
+              lastName: true,
+              phone: true,
+              photoUrl: true,
+            },
+          });
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      )
+      .catch((error: unknown) => {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2034'
+        ) {
+          throw new ConflictException('Ya existe una cuenta de gerencia');
+        }
+        throw error;
+      });
+
+    return this.createSession(user);
+  }
+
+  async updateProfile(
+    userId: number,
+    datos: UpdateProfileDto,
+    foto?: Express.Multer.File,
+  ) {
     const [firstName, ...lastNameParts] = datos.nombre.trim().split(/\s+/);
     const photoExtension = foto ? this.validatePhoto(foto) : undefined;
     const photoDirectory = join(process.cwd(), 'uploads', 'avatars');
-    const photoFilename = photoExtension ? `${randomUUID()}.${photoExtension}` : undefined;
-    const photoPath = photoFilename ? join(photoDirectory, photoFilename) : undefined;
+    const photoFilename = photoExtension
+      ? `${randomUUID()}.${photoExtension}`
+      : undefined;
+    const photoPath = photoFilename
+      ? join(photoDirectory, photoFilename)
+      : undefined;
 
     if (foto && photoPath) {
       await mkdir(photoDirectory, { recursive: true });
@@ -79,7 +148,9 @@ export class AuthService {
           firstName,
           lastName: lastNameParts.join(' ') || null,
           phone: datos.telefono || null,
-          ...(photoFilename ? { photoUrl: `/uploads/avatars/${photoFilename}` } : {}),
+          ...(photoFilename
+            ? { photoUrl: `/uploads/avatars/${photoFilename}` }
+            : {}),
         },
         select: {
           id: true,
@@ -103,16 +174,21 @@ export class AuthService {
 
   private validatePhoto(foto: Express.Multer.File): string {
     const signatures: Record<string, (buffer: Buffer) => boolean> = {
-      'image/jpeg': (buffer) => buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff,
+      'image/jpeg': (buffer) =>
+        buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff,
       'image/png': (buffer) =>
-        buffer.length >= 8
-        && buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])),
+        buffer.length >= 8 &&
+        buffer
+          .subarray(0, 8)
+          .equals(
+            Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+          ),
       'image/gif': (buffer) =>
-        buffer.subarray(0, 6).toString('ascii') === 'GIF87a'
-        || buffer.subarray(0, 6).toString('ascii') === 'GIF89a',
+        buffer.subarray(0, 6).toString('ascii') === 'GIF87a' ||
+        buffer.subarray(0, 6).toString('ascii') === 'GIF89a',
       'image/webp': (buffer) =>
-        buffer.subarray(0, 4).toString('ascii') === 'RIFF'
-        && buffer.subarray(8, 12).toString('ascii') === 'WEBP',
+        buffer.subarray(0, 4).toString('ascii') === 'RIFF' &&
+        buffer.subarray(8, 12).toString('ascii') === 'WEBP',
     };
     const extensions: Record<string, string> = {
       'image/jpeg': 'jpg',
@@ -123,7 +199,9 @@ export class AuthService {
     const isValidImage = signatures[foto.mimetype]?.(foto.buffer);
 
     if (!isValidImage) {
-      throw new BadRequestException('El archivo seleccionado no es una imagen válida');
+      throw new BadRequestException(
+        'El archivo seleccionado no es una imagen válida',
+      );
     }
 
     return extensions[foto.mimetype];
@@ -138,7 +216,8 @@ export class AuthService {
     phone: string | null;
     photoUrl: string | null;
   }) {
-    const nombre = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
+    const nombre =
+      [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
 
     return {
       id: user.id,
@@ -148,5 +227,23 @@ export class AuthService {
       telefono: user.phone,
       foto: user.photoUrl,
     };
+  }
+
+  private createSession(user: {
+    id: number;
+    email: string;
+    role: Role;
+    firstName: string | null;
+    lastName: string | null;
+    phone: string | null;
+    photoUrl: string | null;
+  }) {
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      this.configService.getOrThrow<string>('JWT_SECRET'),
+      { expiresIn: '8h' },
+    );
+
+    return { token, usuario: this.toPublicUser(user) };
   }
 }

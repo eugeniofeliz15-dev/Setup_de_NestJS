@@ -11,10 +11,17 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBody,
+  ApiBearerAuth,
+  ApiConsumes,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { BootstrapGerenciaDto } from './dto/bootstrap-gerencia.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import type { AuthenticatedRequest } from './guards/jwt-auth.guard';
@@ -31,7 +38,7 @@ export class AuthController {
     return this.authService.register(
       registerDto.email,
       registerDto.password,
-      registerDto.role
+      registerDto.role,
     );
   }
 
@@ -40,6 +47,16 @@ export class AuthController {
   @Post('login')
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto.email, loginDto.password);
+  }
+
+  @ApiOperation({
+    summary:
+      'Crea la cuenta inicial de gerencia con un código de configuración',
+  })
+  @ApiBody({ type: BootstrapGerenciaDto })
+  @Post('bootstrap-gerencia')
+  bootstrapGerencia(@Body() bootstrapDto: BootstrapGerenciaDto) {
+    return this.authService.bootstrapGerencia(bootstrapDto);
   }
 
   @ApiOperation({ summary: 'Actualiza el perfil del usuario autenticado' })
@@ -63,8 +80,15 @@ export class AuthController {
       storage: memoryStorage(),
       limits: { fileSize: 5 * 1024 * 1024, files: 1 },
       fileFilter: (_request, file, callback) => {
-        if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.mimetype)) {
-          callback(new BadRequestException('La foto debe ser JPEG, PNG, GIF o WebP'), false);
+        if (
+          !['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(
+            file.mimetype,
+          )
+        ) {
+          callback(
+            new BadRequestException('La foto debe ser JPEG, PNG, GIF o WebP'),
+            false,
+          );
           return;
         }
         callback(null, true);

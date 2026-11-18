@@ -1,5 +1,8 @@
 import { api } from '../lib/axios';
-import type { LoginFormData } from '../schemas/loginSchema';
+import type {
+  BootstrapGerenciaFormData,
+  LoginFormData,
+} from '../schemas/loginSchema';
 
 export interface LoginResponse {
   token: string;
@@ -18,9 +21,25 @@ export async function login(datos: LoginFormData): Promise<LoginResponse> {
   return data;
 }
 
-export async function actualizarPerfil(datos: FormData): Promise<LoginResponse['usuario']> {
-  const { data } = await api.patch<LoginResponse['usuario']>('/auth/profile', datos, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+export async function bootstrapGerencia(
+  datos: BootstrapGerenciaFormData,
+): Promise<LoginResponse> {
+  const { data } = await api.post<LoginResponse>(
+    '/auth/bootstrap-gerencia',
+    datos,
+  );
+  return data;
+}
+
+export async function actualizarPerfil(
+  datos: FormData,
+): Promise<LoginResponse['usuario']> {
+  const { data } = await api.patch<LoginResponse['usuario']>(
+    '/auth/profile',
+    datos,
+    {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    },
+  );
   return data;
 }
